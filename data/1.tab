@@ -1,0 +1,5 @@
+rank input candidate c_onset c_no_coda
+1	/baba/	/ba.ba/	0	0
+0.7	/baba/	/ba.ban/	0	1
+0.2	/baba/	/ban.ban/	0	2
+0	/baba/	/bab.a/	1	1

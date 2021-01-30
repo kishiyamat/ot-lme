@@ -1,0 +1,74 @@
+---
+title: "Description"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Tablau
+
+Rの data.frame で`data/1.tab`を読ませるとこんな感じになる。
+適当に岸山が /ba.ba/ と /bab.a/ 以外は作成.
+rankは1--0のランク, input と candidate はそのまま、
+`c_`始まりは制約(constraints). その下の 1は`*`, 2は`**`みたいなもの。
+Tablau感は...ありますかね？
+
+```{r cars}
+tab_1 = read.table("data/1.tab", header = T)
+tab_1
+```
+
+同じ制約のセットを持った別の例を `data/` にどんどん足していきたい。
+下の例は勝手に作成.
+
+```{r}
+tab_2 = read.table("data/2.tab", header = T)
+tab_2
+```
+
+簡単にデータはくっつけられる。
+
+```{r}
+tabs = rbind(tab_1, tab_2)
+tabs
+```
+
+## Model
+
+rankを制約から予測して、制約の重みを推定させる。
+
+```{r}
+reg_formula = rank ~ c_onset + c_no_coda
+model = lm(reg_formula, tabs)
+summary(model)
+```
+
+TablauのConstraintsの左右と重みは1:1の関係にある。
+例えば c_onset に違反すると(c_onset==1) Estimate は 0.62、
+c_no_coda に違反すると(c_no_coda==1) Estimate は 0.39
+rank が下がる。これは c_onset の方が違反した時のペナルティーが重いことを示す。
+このペナルティーの重さが大きいものをTablauでは人手で左に寄せている。
+つまり重さ=Constraintsの順序になる。
+
+## ToDo
+
+1. rank は1(Best)と0(Worst) を入れる. 不明なときは直観で良い
+1. input は input
+1. candidate は candidate
+1. それより右には constraints を書く
+    1. constraints の種類は揃える
+    1. ただし多くても少なくても問題ない. NAとなるだけ
+    
+後はRで複数のconstraintの重みを自動で推定する。
+自動で推定した重みはそのままTablau上の制約の優先度になる。
+
+```{r}
+tab_more = read.table("data/more.tab", header = T)
+tab_less = read.table("data/less.tab", header = T)
+dplyr::bind_rows(tab_1, tab_more, tab_less)
+```
+
